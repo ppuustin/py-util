@@ -2,7 +2,8 @@ Intro
 ==============
 
 This is a collection of miscellaneous python utilities. 
-A collection of examples for different purposes.
+A collection of examples for different purposes and then some.
+Do not expect that the things are organized here.
 
 Misc git commands:
 
