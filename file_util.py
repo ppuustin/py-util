@@ -131,5 +131,40 @@ class FileUtil():
         if not os.path.isdir(os.path.dirname(file)): os.makedirs(os.path.dirname(file))
         with open(file, 'w') as fp: json.dump(stat, fp, indent=2)
 
+    @staticmethod  
+    def parse_wiki():
+        import mwxml
+        import glob
+        import wikitextparser
 
+        f = 'enwiktionary-20250401-pages-meta-current.xml.bz2' #tot: 10061853
+        paths = glob.glob(f)
+
+        def process_dump(dump, path):
+            for page in dump:
+                for revision in page:
+                    txt = revision.text
+                    l = len(txt) if txt is not None else 0
+
+                    if txt is not None:
+                        txt = wikitextparser.parse(txt).plain_text()
+                        #txt = re.sub(r'[d+]', '', txt)
+                        print('---\n')
+                        print(txt)
+                                    
+                    #print(page.title)
+                    yield page.id, revision.id, revision.timestamp, l
+
+        i = 0
+        for page_id, rev_id, rev_timestamp, rev_textlength in mwxml.map(process_dump, paths):
+            #print("\t".join(str(v) for v in [page_id, rev_id, rev_timestamp, rev_textlength]))
+            i += 1
+            if i % 10000 == 0: print(i)
+        print('tot:', i)
         
+'''
+data = {k: v for k, v in data.items() if re.match('.*(?=.*bbb.*)(?=.*ccc.*)(?!.*ddd.*).*',k)}
+
+n = re.search(r'es_(.*?)\.csv\.gz', f).group(1)
+            
+'''
