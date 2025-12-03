@@ -7,6 +7,71 @@ class FileUtil():
         pass
 
     @staticmethod
+    def count_stat(what, stats):
+        cnt = stats.setdefault(what,0)
+        stats[what] = cnt+1
+        return stats
+
+    @staticmethod
+    def get_id(what, index):
+        _max = index.setdefault('MAX',-1)
+        if what not in index:
+            index['MAX'] = _max+1
+            index[what] = index['MAX']
+        return index
+
+    @staticmethod
+    def get_query(q_file):
+        with open(q_file, 'r') as file:
+            query = file.read()
+        return query
+
+    @staticmethod
+    def do_stat(_dir, furls):
+        from urllib.parse import urlparse
+        stats = {}
+        files = os.listdir(_dir)
+        for i, f in enumerate(files):
+            #if i > 2: break
+            if '.csv.gz' in f:
+                print(f)
+                df = pd.read_csv(_dir + '/' + f)
+                for row in zip(*df.to_dict("list").values()):         
+                    pid, url = row[0], row[1]
+                    parsed_url = urlparse(url)
+                    #print(url)
+                    if '_cat' in furls: url = parsed_url.netloc + '/' + parsed_url.path.split('/')[1]
+                    elif '_all' in furls: url = url
+                    else: url = parsed_url.scheme + '://' + parsed_url.netloc                
+                    stats = count_stat(url, stats)
+        FileUtil.save_stat(furls, stats)
+
+    @staticmethod
+    def index_urls(_dir, fpid2id, furl2id, fmap):
+        from urllib.parse import urlparse
+        stats = {}
+        pid2id, url2id = {}, {}
+        lines = []
+        lines.append('pid,ind')
+        files = os.listdir(_dir)
+        for f in files:
+            if '.csv.gz' in f:
+                print(f)
+                df = pd.read_csv(_dir + '/' + f)
+                for row in zip(*df.to_dict("list").values()):         
+                    pid, url = row[0], row[1]
+                    pid2id = FileUtil.get_id(pid, pid2id)
+                    url2id = FileUtil.get_id(url, url2id)
+                    lines.append('{0},{1}'.format(pid2id[pid],url2id[url]))
+
+        FileUtil.save_stat(fpid2id, pid2id)
+        FileUtil.save_stat(furl2id, url2id)
+        FileUtil.write_lines(fmap, lines, 'w')
+
+    # ------------------------------------
+
+
+    @staticmethod
     def atoi(text):
         return int(text) if text.isdigit() else text
 
@@ -71,6 +136,7 @@ class FileUtil():
                 rows.append(row)
         return rows
 
+    @staticmethod  
     def to_csv(df, f, fmt='%Y-%m-%d', dcol='date'):
         df.to_csv(final_file, compression='gzip', index=False)
         #df.fillna(0.0).to_csv(f, header=True, index=False, encoding='utf-8')
@@ -104,6 +170,18 @@ class FileUtil():
         print('df:', df.shape)
         print(df.columns)
         return df
+
+    def json_to_csv(file):
+        js = read_json(file)
+        df = pd.DataFrame(columns=['value','index'])
+        for i, k in enumerate(js):
+            print(i, len(js))
+            if 'MAX' == k: continue
+            df.loc[len(df)] = [k,js[k]]
+            #df.iloc[len(df)] = [k,js[k]]
+        
+        df.to_parquet(file.replace('.json', '.parquet.gzip'), engine='fastparquet', compression='gzip')
+
 
     @staticmethod
     def json_to_parquet(file):
