@@ -7,6 +7,13 @@ class FileUtil():
         pass
 
     @staticmethod
+    def do_intersect(a, b):
+        try:
+            return [x for x in a if x in b]        
+        except Exception as e:
+            print('error:', e)
+
+    @staticmethod
     def count_stat(what, stats):
         cnt = stats.setdefault(what,0)
         stats[what] = cnt+1
