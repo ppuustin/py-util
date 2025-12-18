@@ -171,11 +171,15 @@ class FileUtil():
         df.to_parquet(file.replace('.csv', '.parquet.gzip'), engine='fastparquet', compression='gzip')  
 
     @staticmethod
-    def read_parquet(file):
+    def read_parquet(file, fmt='%Y-%m-%d %H:%M:%S:', dcol=None): #'%Y-%m-%dT%H:%M:%S.000Z'
         print(sys._getframe().f_code.co_name, file)
-        df = pd.read_parquet(file, engine='fastparquet')
+        df = pd.read_parquet(file, engine='fastparquet') #auto
         print('df:', df.shape)
         print(df.columns)
+        if dcol is not None:
+            df[dcol] = pd.to_datetime(df[dcol], format=fmt)
+            df = df.sort_values(by=dcol)
+            df = df.set_index(dcol)
         return df
 
     def json_to_csv(file):
