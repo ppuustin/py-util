@@ -129,9 +129,24 @@ def dist():
     plt.show()
     plt.close()
 
+def table(fs=(5,2), fname='table.png', dpi=300):
+    dict_ = {'key 1': 1, 'key 2': 2,}
+    df = pd.DataFrame([dict_])
+
+    fig, ax = plt.subplots(1,1, figsize=fs)
+    t = ax.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center')#, colWidths=[.1,.1,.8])
+    t.auto_set_font_size(False)
+    t.set_fontsize(10)
+    t.auto_set_column_width(col=list(range(len(df.columns))))
+
+    plt.gca().axis('off')
+    plt.tight_layout()
+    plt.savefig(fname, dpi=dpi)
+    plt.show()
+    plt.close()
 
 def main():
-    dist()
+    table()
 
 # ------------------------------------------
 
