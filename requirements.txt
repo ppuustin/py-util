@@ -17,6 +17,7 @@
 # no need
 #numpy==1.19.2
 
+pyautogui
 
 # old
 #matplotlib==3.5.3
