@@ -134,6 +134,16 @@ class FileUtil():
         print('rows:', len(rows))
         return rows	
 
+    @staticmethod 
+    def get_file_rows_detect(file):
+        import chardet
+        with open(file, 'rb') as f:
+            enc = chardet.detect(f.read())
+        rows = []
+        with open(file, encoding=enc['encoding']) as f:
+            for line in f: rows.append(line.strip())
+        return rows
+
     @staticmethod     
     def get_csv_rows(file, delim=','):            
         rows = []    
