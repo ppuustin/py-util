@@ -145,8 +145,37 @@ def table(fs=(5,2), fname='table.png', dpi=300):
     plt.show()
     plt.close()
 
+def flatten():
+    dcol, ncol, vcol = 'date', 'name', 'value'
+    data = '''{"2000-01-01" : 0.000, "2000-01-02" : 0.588, "2000-01-03" : 1.0,  "2000-01-04" : 0.588, "2000-01-05" : 0.000,
+               "2000-01-06" : -0.588, "2000-01-07" : -1.0, "2000-01-08" : -0.588, "2000-01-09" : 0.000}'''
+    d = json.loads(data)
+    d1 = pd.DataFrame(d.items(), columns=[dcol, vcol])
+    d1[ncol] = 'A'
+    d2 = pd.DataFrame(d.items(), columns=[dcol, vcol])
+    d2[ncol] = 'B'
+    d2[vcol] = d2[vcol] * 2
+    df = pd.concat([d1,d2], axis=0)
+        
+    #dfa = df[df[ncol] == 'A']
+    #dfa = dfa.rename({vcol: '{0}_{1}'.format(vcol,'a') }, axis='columns')     
+    #dfb = df[df[ncol] == 'B']
+    #dfb = dfb.rename({vcol: '{0}_{1}'.format(vcol,'b') }, axis='columns')       
+    #df = pd.concat([dfa, dfb], axis=1)
+    #df[dcol] = pd.to_datetime(df[dcol])
+    #df = df.set_index(dcol)
+    #df.sort_values(by=dcol) 
+
+    df = pd.pivot_table(df, values=vcol, index=dcol, columns=ncol, aggfunc='sum')
+            
+    df.plot(rot=45)
+    plt.tight_layout()
+    plt.grid()
+    plt.show()
+    plt.close()
+
 def main():
-    table()
+    flatten()
 
 # ------------------------------------------
 
@@ -159,4 +188,23 @@ try:
 
 except Exception as e:
     print('error:', e)
+    
+    
+date,value
+2000-01-01,0.000
+2000-01-02,0.588
+2000-01-03,0.951
+2000-01-04,0.951
+2000-01-05,0.588
+2000-01-06,0.000
+2000-01-07,-0.588
+2000-01-08,-0.951
+2000-01-09,-0.951
+2000-01-10,-0.588
+2000-01-10,0.000
+
+
+    
+    
+    
 '''
