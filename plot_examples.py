@@ -148,7 +148,7 @@ def table(fs=(5,2), fname='table.png', dpi=300):
 def flatten():
     dcol, ncol, vcol = 'date', 'name', 'value'
     data = '''{"2000-01-01" : 0.000, "2000-01-02" : 0.588, "2000-01-03" : 1.0,  "2000-01-04" : 0.588, "2000-01-05" : 0.000,
-               "2000-01-06" : -0.588, "2000-01-07" : -1.0, "2000-01-08" : -0.588, "2000-01-09" : 0.000}'''
+               "2000-01-06" : -0.588,  "2000-01-08" : -0.588, "2000-01-09" : 0.000}''' #"2000-01-07" : -1.0,
     d = json.loads(data)
     d1 = pd.DataFrame(d.items(), columns=[dcol, vcol])
     d1[ncol] = 'A'
@@ -162,11 +162,21 @@ def flatten():
     #dfb = df[df[ncol] == 'B']
     #dfb = dfb.rename({vcol: '{0}_{1}'.format(vcol,'b') }, axis='columns')       
     #df = pd.concat([dfa, dfb], axis=1)
-    #df[dcol] = pd.to_datetime(df[dcol])
-    #df = df.set_index(dcol)
-    #df.sort_values(by=dcol) 
+
+    df[dcol] = pd.to_datetime(df[dcol])
+    df = df.set_index(dcol)
+    df.sort_values(by=dcol) 
 
     df = pd.pivot_table(df, values=vcol, index=dcol, columns=ncol, aggfunc='sum')
+
+    new_idx = pd.date_range(df.index.min(), df.index.max(), freq='D')
+    new_idx = new_idx.union(df.index)
+    df = df.reindex(new_idx)
+
+    #df.interpolate(method='spline', order=2, limit_direction='forward', inplace=True) #  spline polynomial    
+    #df.interpolate(method='linear', limit_direction='forward', inplace=True) # index pad time linear 
+    #df.fillna(0, inplace=True)
+    print(df)
             
     df.plot(rot=45)
     plt.tight_layout()
